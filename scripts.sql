@@ -1,29 +1,8 @@
--- add columns
-ALTER TABLE transactions add column modified_by TEXT;
-ALTER TABLE transactions add column modified_at TIMESTAMP;
-
-
-CREATE OR REPLACE FUNCTION record_change_user()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.modified_by := current_user;
-    NEW.modified_at := CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-
--- Trigger for UPDATE
-CREATE TRIGGER trigger_record_user_update
-BEFORE UPDATE ON transactions
-FOR EACH ROW EXECUTE FUNCTION record_change_user();
-
 -- capture before records on debezium
 ALTER TABLE transactions REPLICA IDENTITY FULL;
 
 --change information column
 ALTER TABLE transactions ADD COLUMN change_info JSONB;
-
 
 -- capture the changes to specific columns into json object
 CREATE OR REPLACE FUNCTION record_changed_columns()
@@ -47,3 +26,8 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Trigger for UPDATE
+CREATE TRIGGER trigger_record_user_update
+BEFORE UPDATE ON transactions
+FOR EACH ROW EXECUTE FUNCTION record_changed_columns();

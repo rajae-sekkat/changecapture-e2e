@@ -51,7 +51,7 @@ def create_table(conn):
 
 if __name__ == "__main__":
     conn = psycopg2.connect(
-        host='192.168.56.102',
+        host='192.168.56.102', # use the ip add of your machine, if you are using Docker desktop use localhost
         database='financial_db',
         user='postgres',
         password='postgres',
